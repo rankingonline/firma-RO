@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Firmas - Ranking Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Reset y Variables Globales */
+:root {
+  --primary: #273480;
+  --primary-hover: #1e2865;
+  --accent: #CBD2FF;
+  --bg: #f4f7fa;
+  --surface: #ffffff;
+  --text: #333333;
+  --text-muted: #666666;
+  --border: #e2e8f0;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: inherit; }
+
+svg { width: 100%; height: 100%; }
+
+/* Contenedor principal */
+.dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+/* Tarjeta de Firma (Componente) */
+.card {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+  margin-bottom: 40px;
+  border: 1px solid var(--border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(39, 52, 128, 0.08);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.badge {
+  background: #eef2ff;
+  color: var(--primary);
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Controles de Configuración (Toggle) */
+.controls-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  background: #f8fafc;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 34px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+input:checked + .slider {
+  background-color: var(--primary);
+}
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+.switch-label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+input:checked ~ .switch-label {
+  color: var(--primary);
+}
+
+/* Contenedor de Previsualización */
+.preview-container {
+  background: #fafbfc;
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 50px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+/* Aviso de Cambio de Imágenes */
+.note-box {
+  background: #fff8e6;
+  border-left: 4px solid #f59e0b;
+  padding: 20px 24px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.note-box .icon {
+  color: #f59e0b;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.note-content p {
+  margin: 0 0 6px 0;
+  font-weight: 600;
+  color: #92400e;
+  font-size: 1.05rem;
+}
+
+.note-content span {
+  font-size: 0.95rem;
+  color: #b45309;
+  line-height: 1.5;
+  display: block;
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(39, 52, 128, 0.2);
+}
+
+.btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(39, 52, 128, 0.25);
+}
+
+.btn .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--border);
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: none;
+  box-shadow: none;
+  color: var(--primary-hover);
+}
+
+/* Modal Inteligente */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--surface);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--primary);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+}
+
+.close-btn:hover {
+  background: #f1f5f9;
+  color: #ef4444;
+}
+
+.close-btn .icon { width: 24px; height: 24px; }
+
+.modal-body {
+  padding: 24px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.code-container {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 0;
+  overflow-x: auto;
+}
+
+.code-container code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.modal-footer {
+  padding: 24px 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  background: #fafbfc;
+  border-radius: 0 0 24px 24px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- Cabecera del Portal -->
+  <div class="header">
+    <h1>Portal de Firmas de Correo</h1>
+    <p>Centro de gestión de firmas HTML para equipo de Ranking Online</p>
+  </div>
+
+  <!-- Componente: Firma 1 -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title" id="titulo-variante-1">Firma sin imagen (con redes)</h2>
+      <span class="badge">Variante 1</span>
+    </div>
+
+    <!-- Controles de Configuración -->
+    <div class="controls-container">
+      <label class="switch">
+        <input type="checkbox" id="toggle-social-1" checked onchange="updateVariante1()">
+        <span class="slider"></span>
+      </label>
+      <span class="switch-label" id="label-social-1">Incluir redes sociales</span>
+    </div>
+
+    <!-- Previsualización rendering -->
+    <div class="preview-container" id="preview-variante-1">
+      <!-- Se inyecta por JS para evitar duplicar código -->
+    </div>
+
+    <!-- Nota Manual de Imágenes -->
+    <div class="note-box">
+      <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div class="note-content">
+        <p>Aviso importante sobre las imágenes</p>
+        <span>Las imágenes que conforman los logos y la foto (si aplica) tienen que cambiarse de forma manual en el código HTML por una URL absoluta subida al servidor web (por ejemplo: <code>https://tudominio.com/assets/logo.png</code>) para que cualquier cliente de correo pueda procesarla sin problemas.</span>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div>
+      <button class="btn" onclick="verHTMLVariante1()">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </div>
+        Ver HTML
+      </button>
+    </div>
+  </div>
+
+  <!-- Componente: Firma 2 -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title" id="titulo-variante-2">Firma con imagen (con redes)</h2>
+      <span class="badge">Variante 2</span>
+    </div>
+
+    <!-- Controles de Configuración -->
+    <div class="controls-container">
+      <label class="switch">
+        <input type="checkbox" id="toggle-social-2" checked onchange="updateVariante2()">
+        <span class="slider"></span>
+      </label>
+      <span class="switch-label" id="label-social-2">Incluir redes sociales</span>
+    </div>
+
+    <!-- Previsualización rendering -->
+    <div class="preview-container" id="preview-variante-2">
+      <!-- Se inyecta por JS para evitar duplicar código -->
+    </div>
+
+    <!-- Nota Manual de Imágenes -->
+    <div class="note-box">
+      <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div class="note-content">
+        <p>Aviso importante sobre las imágenes</p>
+        <span>Recuerda cambiar tanto la foto <code>assets/images/picture-person.png</code> como los logos <code>assets/logo/...</code> por URLs absolutas antes de pegar el código en el gestor de correo.</span>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div>
+      <button class="btn" onclick="verHTMLVariante2()">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </div>
+        Ver HTML
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- =============== MODAL (EMERGENTE) =============== -->
+<div class="modal-overlay" id="code-modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Código HTML de la Firma</h2>
+      <button class="close-btn" onclick="closeModal()">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Aquí se carga el código crudo -->
+      <pre class="code-container"><code id="modal-code"></code></pre>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
+      <button class="btn" id="copy-btn" onclick="copyCode()">
+        <div class="icon" id="copy-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+          </svg>
+        </div>
+        <span id="copy-text">Copiar HTML</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============== CÓDIGO ORÍGENES DE LAS FIRMAS (Invisible) =============== -->
+<!-- Se guardan en etiquetas script transparentes para no dañar el formato al extraerlas. -->
+
+<script type="text/plain" id="html-variante-1">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 800px; background-color: transparent;">
+  <tr>
+    <td align="left">
+      <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+        <tr>
+          <!-- LEFTSIDE: Bloque Azul principal -->
+          <td valign="middle" style="background-color: #273480; border-radius: 32px; padding: 48px; box-sizing: border-box;">
+            
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+<!-- START_SOCIAL -->
+              <!-- Redes Sociales -->
+              <tr>
+                <td style="padding-bottom: 24px;">
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="32" height="32" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <a href="#"><img src="assets/icon/instagram.svg" alt="Instagram" width="16" height="16" style="display: block; border: 0; margin: 0 auto;" /></a>
+                      </td>
+                      <td width="12" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="32" height="32" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <a href="#"><img src="assets/icon/x.svg" alt="X" width="16" height="16" style="display: block; border: 0; margin: 0 auto;" /></a>
+                      </td>
+                      <td width="12" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="32" height="32" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <a href="#"><img src="assets/icon/linkedin.svg" alt="LinkedIn" width="16" height="16" style="display: block; border: 0; margin: 0 auto;" /></a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+<!-- END_SOCIAL -->
+              
+              <!-- Nombre y Puesto -->
+              <tr>
+                <td style="font-family: Arial, sans-serif; color: #ffffff; font-size: 42px; font-weight: 600; line-height: 48px; padding-bottom: 8px; letter-spacing: -0.5px;">
+                  María Constanza<br/>Bravin
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family: Arial, sans-serif; color: #CBD2FF; font-size: 16px; font-weight: 500; padding-bottom: 24px;">
+                  Project Manager
+                </td>
+              </tr>
+              
+              <!-- Línea Divisoria -->
+              <tr>
+                <td style="padding-bottom: 24px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td style="border-bottom: 1px solid rgba(255, 255, 255, 0.2); font-size: 1px; line-height: 1px;">&nbsp;</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Datos de Contacto -->
+              <tr>
+                <td>
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="26" height="26" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <img src="assets/icon/email.svg" alt="Email" width="14" height="14" style="display: block; border: 0; margin: 0 auto;" />
+                      </td>
+                      <td width="8" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td style="font-family: Arial, sans-serif; color: #ffffff; font-size: 14px; font-weight: 500; white-space: nowrap;">
+                        <a href="mailto:marketing@rankingonline.com" style="color: #ffffff; text-decoration: none;">marketing@rankingonline.com</a>
+                      </td>
+                      <td width="16" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="1" style="background-color: rgba(255, 255, 255, 0.4); font-size: 1px; line-height: 20px;">&nbsp;</td>
+                      <td width="16" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="26" height="26" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <img src="assets/icon/phone.svg" alt="Phone" width="14" height="14" style="display: block; border: 0; margin: 0 auto;" />
+                      </td>
+                      <td width="8" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td style="font-family: Arial, sans-serif; color: #ffffff; font-size: 14px; font-weight: 500; white-space: nowrap;">
+                        <a href="tel:+34644567539" style="color: #ffffff; text-decoration: none;">+34 644 56 75 39</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+          
+          <!-- Espaciado -->
+          <td width="30" style="font-size: 1px; line-height: 1px; min-width: 30px;">&nbsp;</td>
+          
+          <!-- RIGHTSIDE: Logo -->
+          <td valign="middle" align="center" width="150" style="padding-right: 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" style="padding-bottom: 8px;">
+                  <img src="assets/logo/logo-RO-icon.png" width="85" alt="Icono" style="display: block; border: 0; max-width: 100%; height: auto;" />
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <img src="assets/logo/logo-ro-naming.png" width="115" alt="Ranking Online" style="display: block; border: 0; max-width: 100%; height: auto;" />
+                </td>
+              </tr>
+            </table>
+          </td>
+          
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</script>
+
+<script type="text/plain" id="html-variante-2">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 850px; background-color: transparent;">
+  <tr>
+    <td align="left">
+      <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+        <tr>
+          <!-- LEFTSIDE: Persona y Logos -->
+          <td valign="middle" align="center" width="220" style="padding-right: 32px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" style="padding-bottom: 24px;">
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td align="center" style="padding-bottom: 16px;">
+                        <img src="assets/images/picture-person.png" width="168" alt="Persona" style="display: block; border-radius: 50%; max-width: 100%; height: auto;" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" style="padding-bottom: 8px;">
+                        <img src="assets/logo/logo-RO-icon.png" width="45" alt="Icono" style="display: block; border: 0; max-width: 100%; height: auto;" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center">
+                        <img src="assets/logo/logo-ro-naming.png" width="115" alt="Ranking Online" style="display: block; border: 0; max-width: 100%; height: auto;" />
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          
+          <!-- RIGHTSIDE: Bloque Azul principal -->
+          <td valign="middle" style="background-color: #273480; border-radius: 32px; padding: 48px; box-sizing: border-box;">
+            
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+<!-- START_SOCIAL -->
+              <!-- Redes Sociales -->
+              <tr>
+                <td style="padding-bottom: 24px;">
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="32" height="32" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <a href="#"><img src="assets/icon/instagram.svg" alt="Instagram" width="16" height="16" style="display: block; border: 0; margin: 0 auto;" /></a>
+                      </td>
+                      <td width="12" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="32" height="32" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <a href="#"><img src="assets/icon/x.svg" alt="X" width="16" height="16" style="display: block; border: 0; margin: 0 auto;" /></a>
+                      </td>
+                      <td width="12" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="32" height="32" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <a href="#"><img src="assets/icon/linkedin.svg" alt="LinkedIn" width="16" height="16" style="display: block; border: 0; margin: 0 auto;" /></a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+<!-- END_SOCIAL -->
+              
+              <!-- Nombre y Puesto -->
+              <tr>
+                <td style="font-family: Arial, sans-serif; color: #ffffff; font-size: 42px; font-weight: 600; line-height: 48px; padding-bottom: 8px; letter-spacing: -0.5px;">
+                  María Constanza<br/>Bravin
+                </td>
+              </tr>
+              <tr>
+                <td style="font-family: Arial, sans-serif; color: #CBD2FF; font-size: 16px; font-weight: 500; padding-bottom: 24px;">
+                  Project Manager
+                </td>
+              </tr>
+              
+              <!-- Línea Divisoria -->
+              <tr>
+                <td style="padding-bottom: 24px;">
+                  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td style="border-bottom: 1px solid rgba(255, 255, 255, 0.2); font-size: 1px; line-height: 1px;">&nbsp;</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Datos de Contacto -->
+              <tr>
+                <td>
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td width="26" height="26" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <img src="assets/icon/email.svg" alt="Email" width="14" height="14" style="display: block; border: 0; margin: 0 auto;" />
+                      </td>
+                      <td width="8" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td style="font-family: Arial, sans-serif; color: #ffffff; font-size: 14px; font-weight: 500; white-space: nowrap;">
+                        <a href="mailto:marketing@rankingonline.com" style="color: #ffffff; text-decoration: none;">marketing@rankingonline.com</a>
+                      </td>
+                      <td width="16" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="1" style="background-color: rgba(255, 255, 255, 0.4); font-size: 1px; line-height: 20px;">&nbsp;</td>
+                      <td width="16" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td width="26" height="26" valign="middle" style="background-color: #ffffff; border-radius: 50%; text-align: center;">
+                        <img src="assets/icon/phone.svg" alt="Phone" width="14" height="14" style="display: block; border: 0; margin: 0 auto;" />
+                      </td>
+                      <td width="8" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+                      <td style="font-family: Arial, sans-serif; color: #ffffff; font-size: 14px; font-weight: 500; white-space: nowrap;">
+                        <a href="tel:+34644567539" style="color: #ffffff; text-decoration: none;">+34 644 56 75 39</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+          
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</script>
+
+<!-- =============== SCRIPT DE LÓGICA =============== -->
+<script>
+  // Inicialización: Inyecta visualmente las firmas en el contenedor
+  document.addEventListener("DOMContentLoaded", () => {
+    updateVariante1();
+    updateVariante2();
+  });
+
+  // Genera el HTML final de la Variante 1 con o sin redes sociales
+  function getVariante1HTMLConfigured() {
+    let rawHTML = document.getElementById('html-variante-1').textContent.trim();
+    const showSocial = document.getElementById('toggle-social-1').checked;
+    
+    if (!showSocial) {
+      // Elimina el bloque de redes sociales entero, junto con el padding extra.
+      rawHTML = rawHTML.replace(/<!-- START_SOCIAL -->[\s\S]*?<!-- END_SOCIAL -->\n?/g, '');
+    } else {
+      // Solo limpiamos las marcas temporales
+      rawHTML = rawHTML.replace(/<!-- START_SOCIAL -->\n?/g, '').replace(/<!-- END_SOCIAL -->\n?/g, '');
+    }
+    return rawHTML;
+  }
+
+  // Refrescar el preview al usar el switch y actualizar los títulos
+  function updateVariante1() {
+    const isChecked = document.getElementById('toggle-social-1').checked;
+    const titleLabel = document.getElementById('titulo-variante-1');
+    const switchLabel = document.getElementById('label-social-1');
+    
+    // Inyectar en preview
+    document.getElementById('preview-variante-1').innerHTML = getVariante1HTMLConfigured();
+
+    // Actualizar etiquetas
+    if (isChecked) {
+      titleLabel.innerText = "Firma sin imagen (con redes)";
+      switchLabel.innerText = "Incluir redes sociales";
+    } else {
+      titleLabel.innerText = "Firma sin imagen (sin redes)";
+      switchLabel.innerText = "Incluir redes sociales";
+    }
+  }
+
+  // ========== VARIANTE 2 ==========
+  function getVariante2HTMLConfigured() {
+    let rawHTML = document.getElementById('html-variante-2').textContent.trim();
+    const showSocial = document.getElementById('toggle-social-2').checked;
+    
+    if (!showSocial) {
+      rawHTML = rawHTML.replace(/<!-- START_SOCIAL -->[\s\S]*?<!-- END_SOCIAL -->\n?/g, '');
+    } else {
+      rawHTML = rawHTML.replace(/<!-- START_SOCIAL -->\n?/g, '').replace(/<!-- END_SOCIAL -->\n?/g, '');
+    }
+    return rawHTML;
+  }
+
+  function updateVariante2() {
+    const isChecked = document.getElementById('toggle-social-2').checked;
+    const titleLabel = document.getElementById('titulo-variante-2');
+    const switchLabel = document.getElementById('label-social-2');
+    
+    document.getElementById('preview-variante-2').innerHTML = getVariante2HTMLConfigured();
+
+    if (isChecked) {
+      titleLabel.innerText = "Firma con imagen (con redes)";
+      switchLabel.innerText = "Incluir redes sociales";
+    } else {
+      titleLabel.innerText = "Firma con imagen (sin redes)";
+      switchLabel.innerText = "Incluir redes sociales";
+    }
+  }
+
+  function verHTMLVariante2() {
+    const configuredCode = getVariante2HTMLConfigured();
+    document.getElementById('modal-code').textContent = configuredCode;
+    
+    const modal = document.getElementById('code-modal');
+    modal.classList.add('active');
+    resetCopyButton();
+  }
+
+  // Abre la ventana modal y carga el código ya purgado (con o sin iconos)
+  function verHTMLVariante1() {
+    const configuredCode = getVariante1HTMLConfigured();
+    document.getElementById('modal-code').textContent = configuredCode;
+    
+    const modal = document.getElementById('code-modal');
+    modal.classList.add('active');
+    
+    // Resetea el botón por si había sido pulsado
+    resetCopyButton();
+  }
+
+  // Cierra el modal
+  function closeModal(e) {
+    if (e && e.target.id !== 'code-modal') return;
+    document.getElementById('code-modal').classList.remove('active');
+  }
+
+  // Copia el texto al portapapeles y hace un efecto visual en el botón
+  function copyCode() {
+    const textToCopy = document.getElementById('modal-code').textContent;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      const iconContainer = document.getElementById('copy-icon');
+      const textContainer = document.getElementById('copy-text');
+      
+      // Cambiar icono a un "Check" y texto
+      iconContainer.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>`;
+      textContainer.innerText = '¡Copiado con éxito!';
+      
+      // Devolver a su estado original a los 2.5 segs
+      setTimeout(() => {
+        if(document.getElementById('code-modal').classList.contains('active')) {
+          resetCopyButton();
+        }
+      }, 2500);
+
+    }).catch(err => {
+      console.error('Error al copiar: ', err);
+      alert('Hubo un error al copiar el código al portapapeles. Asegúrate de estar usando HTTPS u otorga permisos.');
+    });
+  }
+
+  function resetCopyButton() {
+    const iconContainer = document.getElementById('copy-icon');
+    const textContainer = document.getElementById('copy-text');
+    iconContainer.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+      </svg>`;
+    textContainer.innerText = 'Copiar HTML';
+  }
+</script>
+
+</body>
+</html>
