@@ -16,5 +16,5 @@ Los correos electrónicos **requieren referenciar imágenes de servidores públi
 
 Para instalar oficialmente estas firmas en un usuario, los desarrolladores/managers deben:
 1. Subir a su propio hosting, AWS S3 o CDN toda la carpeta `/assets` del repositorio (para exponer públicamente el `picture-person.png`, iconografía `.svg` y los logotipos de RO).
-2. Hacer un *Buscar y Reemplazar* de forma simple dentro del archivo `firma.html`, sustituyendo cualquier ruta `src="assets/...` hacia la ruta online definitiva (Ej: `src="https://rankingonline.com/...`).
-3. Posterior al reemplazo, solo hay que abrir `firma.html` en Chrome, usar la Variante deseada, presionar el botón de **Copiar HTML**, y pegar dicho código limpio en los ajustes de firma de Gmail o Outlook.
+2. Hacer un *Buscar y Reemplazar* de forma simple dentro del archivo `index.html`, sustituyendo cualquier ruta `src="assets/...` hacia la ruta online definitiva (Ej: `src="https://rankingonline.com/...`).
+3. Posterior al reemplazo, solo hay que abrir `index.html` en Chrome, usar la Variante deseada, presionar el botón de **Copiar HTML**, y pegar dicho código limpio en los ajustes de firma de Gmail o Outlook.
